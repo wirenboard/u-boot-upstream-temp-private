@@ -2396,6 +2396,7 @@ source "board/phytium/durian/Kconfig"
 source "board/phytium/pomelo/Kconfig"
 source "board/phytium/pe2201/Kconfig"
 source "board/xen/xenguest_arm64/Kconfig"
+source "board/wirenboard/sun50i_wirenboard8/Kconfig"
 
 source "arch/arm/Kconfig.debug"
 

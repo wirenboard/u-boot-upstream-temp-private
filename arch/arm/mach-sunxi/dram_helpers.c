@@ -11,6 +11,7 @@
 #include <asm/barriers.h>
 #include <asm/io.h>
 #include <asm/arch/dram.h>
+#include <linux/delay.h>
 
 /*
  * Wait up to 1s for value to be set in given part of reg.
@@ -44,7 +45,10 @@ bool mctl_mem_matches_base(u32 offset, ulong base)
 	/* Try to write different values to RAM at two addresses */
 	writel(0, base);
 	writel(0xaa55aa55, base + offset);
+	/* taken from https://github.com/armbian/build/blob/v24.02/patch/u-boot/u-boot-sunxi/Allwinner-Fix-incorrect-ram-size-detection-for-H6-boards.patch
+	 * but moved here during testing */
 	dsb();
+	udelay(5000);
 	/* Check if the same value is actually observed when reading back */
 	ret = readl(base) == readl(base + offset);
 

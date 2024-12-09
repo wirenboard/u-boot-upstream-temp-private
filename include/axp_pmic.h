@@ -15,6 +15,7 @@
 #include <axp305.h>
 #include <axp809.h>
 #include <axp818.h>
+#include <axp15060.h>
 
 #define AXP_PMIC_MODE_REG		0x3e
 #define AXP_PMIC_MODE_I2C		0x00
@@ -38,6 +39,7 @@ enum {
 	AXP806_ID,
 	AXP809_ID,
 	AXP813_ID,
+	AXP15060_ID,
 };
 
 int axp_set_dcdc1(unsigned int mvolt);

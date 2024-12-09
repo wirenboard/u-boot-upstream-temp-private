@@ -1,0 +1,30 @@
+if TARGET_SUN50I_WIRENBOARD8
+
+config SYS_BOARD
+    default "sun50i_wirenboard8"
+
+config SYS_VENDOR
+    default "wirenboard"
+
+config SYS_CONFIG_NAME
+    default "sun50i_wirenboard8"
+
+config OF_OVERLAY_ADDR
+    hex
+
+config OF_OVERLAY_OFFSET_BLKS
+    hex
+
+config OF_OVERLAY_SIZE_BLKS
+    hex
+
+choice
+prompt "WB8 flavour"
+
+config WB8_FLAVOUR_GENERIC
+    bool "Generic Wiren Board 8"
+
+endchoice
+
+endif
+

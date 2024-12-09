@@ -10,6 +10,12 @@
  * Some board init for the Allwinner A10-evb board.
  */
 
+/* This file is originally taken from board/sunxi/board.c
+ * and modified for Wiren Board 8 support.
+ *
+ * (C) Copyright 2024 Nikita Maslov <nikita.maslov@wirenboard.ru>
+ */
+
 #include <clock_legacy.h>
 #include <dm.h>
 #include <env.h>
@@ -50,6 +56,12 @@
 #include <sy8106a.h>
 #include <asm/setup.h>
 #include <status_led.h>
+#include <version_string.h>
+
+int board_early_init_f(void)
+{
+	return 0;
+}
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -878,9 +890,66 @@ static void bluetooth_dt_fixup(void *blob)
 			   "local-bd-address", bdaddr, ETH_ALEN, 1);
 }
 
+/*
+Factory-assigned MAC addresses are stored in hidden devicetree overlay.
+Read them from /wirenboard/ethN-mac-address and pass to Linux
+*/
+static void setup_ethernet_mac_addresses(void* blob)
+{
+	unsigned char mac_addr[6];
+	char buffer[20] = {};
+	u32 node;
+	int ret;
+	unsigned i;
+
+	for (i = 0; i < 2; ++i) {
+		node = fdt_path_offset(blob, "/wirenboard");
+		if (node < 0)
+			continue;
+
+		snprintf(buffer, sizeof(buffer), "eth%d-mac-address", i);
+		ret = fdtdec_get_byte_array(blob, node, buffer, mac_addr, 6);
+		if (!ret) {
+			debug("Read eth%d MAC from DT overlay: %pM\n", i, mac_addr);
+			snprintf(buffer, sizeof(buffer), "ethernet%d", i);
+			fdt_find_and_setprop(blob, buffer, "local-mac-address", mac_addr, 6, 1);
+		}
+	}
+}
+
+/*
+Each board's serial number is assigned during the board-init state in production
+and needs to be passed to Linux's default location (/serial-number dt property).
+
+Now, read the serial number from the hidden device-tree overlay (/wirenboard/...) and pass it to Linux.
+
+TODO: This solution is a temporary workaround and will require architectural revision in the future.
+*/
+static void fill_serial_number(void* blob)
+{
+	const char *wbnode_sn_propname = "device-serial";
+	const char *actual_dt_sn_propname = "serial-number";
+
+	int wbnode_offset = fdt_path_offset(blob, "/wirenboard");
+	if (wbnode_offset >= 0) {
+		int len;
+		const char *serial_number = fdt_getprop(blob, wbnode_offset, wbnode_sn_propname, &len);
+		if (serial_number) {
+			int offset = fdt_path_offset(blob, "/");
+			char sn[len];
+			snprintf(sn, sizeof(sn), serial_number);
+			int rc = fdt_setprop_string(blob, offset, actual_dt_sn_propname, sn);
+			if (rc != 0)
+				printf("Unable to set /%s: err=%s\n", actual_dt_sn_propname, fdt_strerror(rc));
+		} else
+			printf("## DT property '%s' not found! If the device was produced before 2023-08-07, please ignore it\n", wbnode_sn_propname);
+	}
+}
+
 int ft_board_setup(void *blob, struct bd_info *bd)
 {
 	int __maybe_unused r;
+	int offset;
 
 	/*
 	 * Call setup_environment and fdt_fixup_ethernet again
@@ -888,7 +957,11 @@ int ft_board_setup(void *blob, struct bd_info *bd)
 	 * copy does not have.
 	 */
 	setup_environment(blob);
-	fdt_fixup_ethernet(blob);
+
+	// Pass U-Boot version to the kernel
+	offset = fdt_path_offset(blob, "/chosen");
+	if (offset >= 0)
+		fdt_setprop_string(blob, offset, "u-boot-version", version_string);
 
 	bluetooth_dt_fixup(blob);
 
@@ -897,6 +970,8 @@ int ft_board_setup(void *blob, struct bd_info *bd)
 	if (r)
 		return r;
 #endif
+	setup_ethernet_mac_addresses(blob);
+	fill_serial_number(blob);
 	return 0;
 }
 

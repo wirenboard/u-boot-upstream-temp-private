@@ -1,0 +1,309 @@
+// SPDX-License-Identifier: (GPL-2.0+ or MIT)
+/*
+ * Copyright (C) 2020 Arm Ltd.
+ */
+
+/dts-v1/;
+
+#include "sun50i-h616.dtsi"
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+#include <dt-bindings/leds/common.h>
+
+/ {
+	model = "Wiren Board 8.x";
+	compatible = "wirenboard,wirenboard-8xx", "allwinner,sun50i-h616";
+
+	aliases {
+		serial0 = &uart0;
+		mmc1 = &mmc2;
+		mmc0 = &mmc0;
+	};
+
+	chosen {
+		stdout-path = "serial0:115200n8";
+	};
+
+	regulators {
+		vdd_sd_power: vdd-sd-power {
+			compatible = "regulator-fixed";
+			gpio = <&pio 4 16 GPIO_ACTIVE_LOW>;  // PE16
+			regulator-name = "vdd-sd-power";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+			enable-active-low;
+		};
+	};
+};
+
+&nmi_intc {
+    compatible = "allwinner,sun8i-v3s-nmi";
+    interrupt-parent = <&gic>;
+    interrupt-controller;
+    #interrupt-cells = <2>;
+    reg = <0x07010320 0x0c>;
+    interrupts = <GIC_SPI 103 IRQ_TYPE_LEVEL_HIGH>;
+};
+
+&ehci1 {
+	status = "okay";
+};
+
+/* USB 2 & 3 are on headers only. */
+
+&mmc0 {
+	vmmc-supply = <&vdd_sd_power>;
+	vqmcc-supply = <&reg_dcdc1>;
+	broken-cd;
+	bus-width = <4>;
+	status = "okay";
+};
+
+&mmc2 {
+	vmmc-supply = <&reg_dcdc1>;
+	vqmmc-supply = <&reg_aldo1>;
+	mmc-ddr-1_8v;
+	mmc-hs200-1_8v;
+	mmc-hs400-1_8v;
+	mmc-hs400-enhanced-strobe; // does not change anything on test board
+	no-sdio;
+	no-sd;
+	bus-width = <8>;
+	status = "okay";
+};
+
+&r_i2c {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&r_i2c_pins>;
+
+	axp15060: pmic@36{
+		compatible = "x-powers,axp15060";
+		reg = <0x36>;
+		interrupt-controller;
+		#interrupt-cells = <1>;
+
+		x-powers,self-working-mode;
+		overtemp_shutdown = <1>;
+		overtemp_value = <145>;
+
+		regulators {
+			reg_dcdc1: dcdc1 {
+				regulator-name = "axp858-dcdc1";
+				regulator-min-microvolt = <1500000>;
+				regulator-max-microvolt = <3400000>;
+				regulator-step-delay-us = <25>;
+				regulator-final-delay-us = <50>;
+				regulator-always-on;
+				under_voltage_shutdown = <1>;
+			};
+
+			reg_dcdc2: dcdc2 {
+				regulator-name = "axp858-dcdc2";
+				regulator-min-microvolt = <500000>;
+				regulator-max-microvolt = <1540000>;
+				regulator-step-delay-us = <25>;
+				regulator-final-delay-us = <50>;
+				regulator-ramp-delay = <6001>; /* FIXME */
+				regulator-always-on;
+				under_voltage_shutdown = <1>;
+			};
+
+			reg_dcdc3: dcdc3 {
+				regulator-name = "axp858-dcdc3";
+				regulator-min-microvolt = <500000>;
+				regulator-max-microvolt = <1540000>;
+				regulator-step-delay-us = <25>;
+				regulator-final-delay-us = <50>;
+				regulator-always-on;
+				under_voltage_shutdown = <1>;
+			};
+
+			reg_dcdc4: dcdc4 {
+				regulator-name = "axp858-dcdc4";
+				regulator-min-microvolt = <500000>;
+				regulator-max-microvolt = <1540000>;
+				regulator-step-delay-us = <25>;
+				regulator-final-delay-us = <50>;
+				regulator-enable-ramp-delay = <1000>;
+				under_voltage_shutdown = <1>;
+			};
+
+			reg_dcdc5: dcdc5 {
+				regulator-name = "axp858-dcdc5";
+				regulator-min-microvolt = <800000>;
+				regulator-max-microvolt = <1840000>;
+				regulator-step-delay-us = <25>;
+				regulator-final-delay-us = <50>;
+				regulator-always-on;
+				under_voltage_shutdown = <1>;
+			};
+
+			reg_dcdc6: dcdc6 {
+				regulator-name = "axp858-dcdc6";
+				regulator-min-microvolt = <500000>;
+				regulator-max-microvolt = <3400000>;
+				regulator-step-delay-us = <25>;
+				regulator-final-delay-us = <50>;
+				under_voltage_shutdown = <1>;
+			};
+
+			reg_aldo1: aldo1 {
+				regulator-name = "axp858-aldo1";
+				regulator-min-microvolt = <700000>;
+				regulator-max-microvolt = <3300000>;
+				regulator-step-delay-us = <25>;
+				regulator-final-delay-us = <50>;
+				regulator-always-on;
+			};
+
+			reg_aldo2: aldo2 {
+				regulator-name = "axp858-aldo2";
+				regulator-min-microvolt = <700000>;
+				regulator-max-microvolt = <3300000>;
+				regulator-step-delay-us = <25>;
+				regulator-final-delay-us = <50>;
+				regulator-always-on;
+			};
+
+			reg_aldo3: aldo3 {
+				regulator-name = "axp858-aldo3";
+				regulator-min-microvolt = <700000>;
+				regulator-max-microvolt = <3300000>;
+				regulator-step-delay-us = <25>;
+				regulator-final-delay-us = <50>;
+			};
+
+			reg_aldo4: aldo4 {
+				regulator-name = "axp858-aldo4";
+				regulator-min-microvolt = <700000>;
+				regulator-max-microvolt = <3300000>;
+				regulator-step-delay-us = <25>;
+				regulator-final-delay-us = <50>;
+				regulator-always-on;
+			};
+
+			reg_aldo5: aldo5 {
+				regulator-name = "axp858-aldo5";
+				regulator-min-microvolt = <700000>;
+				regulator-max-microvolt = <3300000>;
+				regulator-step-delay-us = <25>;
+				regulator-final-delay-us = <50>;
+			};
+
+			reg_bldo1: bldo1 {
+				regulator-name = "axp858-bldo1";
+				regulator-min-microvolt = <700000>;
+				regulator-max-microvolt = <3300000>;
+				regulator-step-delay-us = <25>;
+				regulator-final-delay-us = <50>;
+			};
+
+			reg_bldo2: bldo2 {
+				regulator-name = "axp858-bldo2";
+				regulator-min-microvolt = <700000>;
+				regulator-max-microvolt = <3300000>;
+				regulator-step-delay-us = <25>;
+				regulator-final-delay-us = <50>;
+			};
+
+			reg_bldo3: bldo3 {
+				regulator-name = "axp858-bldo3";
+				regulator-min-microvolt = <700000>;
+				regulator-max-microvolt = <3300000>;
+				regulator-step-delay-us = <25>;
+				regulator-final-delay-us = <50>;
+			};
+
+			reg_bldo4: bldo4 {
+				regulator-name = "axp858-bldo4";
+				regulator-min-microvolt = <700000>;
+				regulator-max-microvolt = <1800000>;
+				regulator-step-delay-us = <25>;
+				regulator-final-delay-us = <50>;
+				regulator-always-on;
+			};
+
+			reg_bldo5: bldo5 {
+				regulator-name = "axp858-bldo5";
+				regulator-min-microvolt = <700000>;
+				regulator-max-microvolt = <3300000>;
+				regulator-step-delay-us = <25>;
+				regulator-final-delay-us = <50>;
+			};
+
+			reg_cldo1: cldo1 {
+				regulator-name = "axp858-cldo1";
+				regulator-min-microvolt = <700000>;
+				regulator-max-microvolt = <3300000>;
+				regulator-step-delay-us = <25>;
+				regulator-final-delay-us = <50>;
+				regulator-always-on;
+			};
+
+			reg_cldo2: cldo2 {
+				regulator-name = "axp858-cldo2";
+				regulator-min-microvolt = <700000>;
+				regulator-max-microvolt = <1800000>;
+				regulator-step-delay-us = <25>;
+				regulator-final-delay-us = <50>;
+				regulator-always-on;
+			};
+
+			reg_cldo3: cldo3 {
+				regulator-name = "axp858-cldo3";
+				regulator-min-microvolt = <700000>;
+				regulator-max-microvolt = <3300000>;
+				regulator-step-delay-us = <25>;
+				regulator-final-delay-us = <50>;
+			};
+
+			reg_cldo4: cldo4 {
+				regulator-name = "axp858-cldo4";
+				regulator-min-microvolt = <700000>;
+				regulator-max-microvolt = <4200000>;
+				regulator-step-delay-us = <25>;
+				regulator-final-delay-us = <50>;
+			};
+
+			reg_cpusldo: cpusldo {
+				regulator-name = "axp858-cpusldo";
+				regulator-min-microvolt = <700000>;
+				regulator-max-microvolt = <1400000>;
+				regulator-step-delay-us = <25>;
+				regulator-final-delay-us = <50>;
+			};
+
+			reg_sw: sw {
+				regulator-name = "axp858-sw";
+				regulator-always-on;
+			};
+		};
+	};
+};
+
+&pio {
+	vcc-pa-supply = <&reg_dcdc1>;
+	vcc-pc-supply = <&reg_aldo1>;
+	vcc-pd-supply = <&reg_dcdc1>, <&reg_bldo1>;
+	vcc-pe-supply = <&reg_dcdc1>;
+	vcc-pf-supply = <&reg_dcdc1>; // vcc-io
+	vcc-pg-supply = <&reg_dcdc1>;
+	vcc-ph-supply = <&reg_dcdc1>; // vcc-io
+	vcc-pi-supply = <&reg_dcdc1>;
+};
+
+&uart0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart0_ph_pins>;
+	status = "okay";
+};
+
+&spi1 {
+	compatible = "allwinner,sun50i-h616-spi";
+	pinctrl-names = "default";
+	pinctrl-0 = <&spi1_pins &spi1_cs0_pin>;
+	interrupts = <GIC_SPI 13 IRQ_TYPE_LEVEL_HIGH>;
+	status = "okay";
+};

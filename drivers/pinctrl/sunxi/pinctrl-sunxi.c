@@ -744,6 +744,7 @@ static const struct sunxi_pinctrl_function sun50i_h616_pinctrl_functions[] = {
 	{ "mmc2",	3 },	/* PC0-PC16 */
 	{ "nand0",	2 },	/* PC0-PC16 */
 	{ "spi0",	4 },	/* PC0-PC7, PC15-PC16 */
+	{ "spi1",	4 },	/* PH5-PH8 */
 #if IS_ENABLED(CONFIG_UART0_PORT_F)
 	{ "uart0",	3 },	/* PF2-PF4 */
 #else
@@ -756,7 +757,7 @@ static const struct sunxi_pinctrl_desc __maybe_unused sun50i_h616_pinctrl_desc =
 	.functions	= sun50i_h616_pinctrl_functions,
 	.num_functions	= ARRAY_SIZE(sun50i_h616_pinctrl_functions),
 	.first_bank	= SUNXI_GPIO_A,
-	.num_banks	= 9,
+	.num_banks	= 10,
 };
 
 static const struct sunxi_pinctrl_function sun50i_h616_r_pinctrl_functions[] = {
