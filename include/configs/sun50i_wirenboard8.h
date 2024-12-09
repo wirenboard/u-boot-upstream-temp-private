@@ -16,7 +16,11 @@
 #define CONFIG_OF_OVERLAY_OFFSET_BLKS    0x7e0
 #define CONFIG_OF_OVERLAY_SIZE_BLKS      0x20
 
+#ifdef CONFIG_WB8_FLAVOUR_BUILDROOT
+#include <configs/wirenboard_buildroot.h>
+#else
 #include <configs/wirenboard_common.h>
+#endif
 
 #ifdef CFG_EXTRA_ENV_SETTINGS
 #undef CFG_EXTRA_ENV_SETTINGS

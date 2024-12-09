@@ -24,6 +24,9 @@ prompt "WB8 flavour"
 config WB8_FLAVOUR_GENERIC
     bool "Generic Wiren Board 8"
 
+config WB8_FLAVOUR_BUILDROOT
+    bool "Buildroot Wiren Board 8"
+
 endchoice
 
 endif

@@ -706,34 +706,6 @@ void get_board_serial(struct tag_serialnr *serialnr)
 }
 #endif
 
-/*
- * Check the SPL header for the "sunxi" variant. If found: parse values
- * that might have been passed by the loader ("fel" utility), and update
- * the environment accordingly.
- */
-static void parse_spl_header(const uint32_t spl_addr)
-{
-	struct boot_file_head *spl = get_spl_header(SPL_ENV_HEADER_VERSION);
-
-	if (spl == INVALID_SPL_HEADER)
-		return;
-
-	if (!spl->fel_script_address)
-		return;
-
-	if (spl->fel_uEnv_length != 0) {
-		/*
-		 * data is expected in uEnv.txt compatible format, so "env
-		 * import -t" the string(s) at fel_script_address right away.
-		 */
-		himport_r(&env_htab, (char *)(uintptr_t)spl->fel_script_address,
-			  spl->fel_uEnv_length, '\n', H_NOCLEAR, 0, 0, NULL);
-		return;
-	}
-	/* otherwise assume .scr format (mkimage-type script) */
-	env_set_hex("fel_scriptaddr", spl->fel_script_address);
-}
-
 static bool get_unique_sid(unsigned int *sid)
 {
 	if (sunxi_get_sid(sid) != 0)
@@ -816,23 +788,9 @@ static void setup_environment(const void *fdt)
 int misc_init_r(void)
 {
 	const char *spl_dt_name;
-	uint boot;
 
 	env_set("fel_booted", NULL);
 	env_set("fel_scriptaddr", NULL);
-	env_set("mmc_bootdev", NULL);
-
-	boot = sunxi_get_boot_device();
-	/* determine if we are running in FEL mode */
-	if (boot == BOOT_DEVICE_BOARD) {
-		env_set("fel_booted", "1");
-		parse_spl_header(SPL_ADDR);
-	/* or if we booted from MMC, and which one */
-	} else if (boot == BOOT_DEVICE_MMC1) {
-		env_set("mmc_bootdev", "0");
-	} else if (boot == BOOT_DEVICE_MMC2) {
-		env_set("mmc_bootdev", "1");
-	}
 
 	/* Set fdtfile to match the FIT configuration chosen in SPL. */
 	spl_dt_name = get_spl_dt_name();
