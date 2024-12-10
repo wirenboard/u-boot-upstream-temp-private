@@ -6,6 +6,9 @@
     "fdt_addr_r=0x4FA00000\0" \
     "scriptaddr=0x4FC00000\0" \
     "fdtoverlay_addr_r=0x4FE00000\0" \
+	"fdt_dir=/boot/dtbs\0" \
+	"fdt_extra_overlay_size="__stringify(CONFIG_OF_OVERLAY_SIZE_BLKS)"\0" \
+	"fdt_extra_overlay_offset="__stringify(CONFIG_OF_OVERLAY_OFFSET_BLKS)"\0" \
     \
     "rauc_slot=A\0" \
     "SLOT_A_FAILED=0\0" \
@@ -65,6 +68,25 @@
        "run mark_current_slot_failed; " \
        "run check_both_failed; " \
        "run switch_slot;\0" \
+    \
+	"loadfdt=mmc read ${fdtoverlay_addr_r} ${fdt_extra_overlay_offset} ${fdt_extra_overlay_size};" \
+		"if fdt addr ${fdtoverlay_addr_r}; then " \
+			"echo Reading factory fdt name from eMMC;" \
+			"fdt get value fdt_name_factory /fragment/__overlay__ factory-fdt;" \
+        "else " \
+			"echo Failed to read factory fdt name from eMMC;" \
+		"fi;" \
+		"run loadmainfdt;" \
+		"fdt addr ${fdt_addr_r} ${fdt_maxsize};" \
+		"\0" \
+	"loadmainfdt=" \
+        "if test -n \"${fdt_name_factory}\" && "\
+            "echo Loading factory fdt ${fdt_name_factory} && "\
+            "sqfsload mmc ${root_part} ${fdt_addr_r} ${fdt_dir}/${fdt_name_factory}.dtb;"\
+        "then true; else " \
+            "echo Loading fdt_file ${fdt_file};" \
+            "sqfsload mmc ${root_part} ${fdt_addr_r} ${fdt_file};" \
+		"fi;\0" \
     "try_boot_scr=" \
        "echo Trying to load boot.scr from slot ${rauc_slot}...; " \
        "if sqfsload mmc ${root_part} ${scriptaddr} /boot/boot.scr; then " \
@@ -72,15 +94,9 @@
          "if source ${scriptaddr}; then " \
            "echo boot.scr returned success but did not run kernel, fallback to direct kernel loading; " \
            "setenv boot_in_progress 1; saveenv; " \
-           "if sqfsload mmc ${root_part} ${kernel_addr_r} /boot/Image.gz; then " \
-             "if sqfsload mmc ${root_part} ${fdt_addr_r} ${fdt_file}; then " \
-               "fdt addr ${fdt_addr_r} ${fdt_maxsize};" \
-               "echo Kernel and DTB loaded (fallback), booting...; " \
-               "booti ${kernel_addr_r} - ${fdt_addr_r} || run fail_fallback; " \
-             "else " \
-               "echo Failed to load DTB (fallback); " \
-               "run fail_fallback; " \
-             "fi; " \
+           "run loadfdt || run fail_fallback; " \
+           "if sqfsload mmc ${root_part} ${kernel_addr_r} " WIRENBOARD_IMAGE_PATH "; then " \
+             WIRENBOARD_BOOT_CMD " || run fail_fallback; " \
            "else " \
              "echo Failed to load Kernel (fallback); " \
              "run fail_fallback; " \
@@ -92,23 +108,19 @@
            "run switch_slot; " \
          "fi; " \
        "else " \
-         "echo No boot.scr found, fallback to loading default kernel and dtb; " \
+         "echo No boot.scr found, fallback to loading default Kernel and DTB; " \
          "setenv boot_in_progress 1; saveenv; " \
-         "if sqfsload mmc ${root_part} ${kernel_addr_r} /boot/Image.gz; then " \
-           "if sqfsload mmc ${root_part} ${fdt_addr_r} ${fdt_file}; then " \
-             "fdt addr ${fdt_addr_r} ${fdt_maxsize};" \
-             "echo Kernel and DTB loaded, booting...; " \
-             "booti ${kernel_addr_r} - ${fdt_addr_r} || run fail_fallback; " \
-           "else " \
-             "echo Failed to load DTB; " \
-             "run fail_fallback; " \
-           "fi; " \
+         "run loadfdt || run fail_fallback; " \
+         "if sqfsload mmc ${root_part} ${kernel_addr_r} " WIRENBOARD_IMAGE_PATH "; then " \
+           WIRENBOARD_BOOT_CMD " || run fail_fallback; " \
          "else " \
            "echo Failed to load Kernel; " \
            "run fail_fallback; " \
          "fi; " \
        "fi;\0" \
     "distro_bootcmd=" \
+	   "mmc dev ${root_part};" \
+	   "mmc rescan;" \
        "if test \"${boot_in_progress}\" = \"1\"; then " \
          "echo Previous attempt was not confirmed, marking current slot as failed...; " \
          "run mark_current_slot_failed; " \
