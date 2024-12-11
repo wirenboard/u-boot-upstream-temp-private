@@ -6,6 +6,10 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
+#ifdef CONFIG_TARGET_SUN50I_WIRENBOARD8
+#include <configs/sun50i_wirenboard8.h>
+#else
 #include <configs/sunxi-common.h>
+#endif
 
 #endif /* __CONFIG_H */

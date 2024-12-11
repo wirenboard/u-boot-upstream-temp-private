@@ -729,8 +729,26 @@ config SYS_CONFIG_NAME
 	default "sun50i" if MACH_SUN50I_H6
 	default "sun50i" if MACH_SUN50I_H616
 
+choice
+	prompt "Sunxi board variant"
+	optional
+
+config TARGET_SUN50I_WIRENBOARD8
+	bool "Wiren Board 8"
+	select MACH_SUN50I_H616
+	select BOARD_EARLY_INIT_F
+
+config TARGET_SUNXI
+	bool "Any sunxi board"
+
+endchoice
+
+if TARGET_SUNXI
+
 config SYS_BOARD
 	default "sunxi"
+
+endif
 
 config SYS_SOC
 	default "sunxi"
