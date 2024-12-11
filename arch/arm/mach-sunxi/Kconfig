@@ -539,6 +539,17 @@ config SUNXI_DRAM_H616_LPDDR4
 	  This option is the LPDDR4 timing used by the stock boot0 by
 	  Allwinner.
 
+config SUNXI_DRAM_T507_LPDDR4
+	bool "LPDDR4 DRAM chips on the T507 DRAM controller"
+	select SUNXI_DRAM_DDR4
+	depends on DRAM_SUN50I_H616
+	help
+	  This option is the LPDDR4 timing used by the boot0 on T507 BSP.
+	  Added by Wiren Board team for Wiren Board 8, source data is taken
+	  from boot0 reverse engineering + patch from Mikhail Kalashnikov <iuncuim@gmail.com>
+	  (https://patchwork.ozlabs.org/project/uboot/patch/20230729111331.173768-2-iuncuim@gmail.com/)
+	  FIXME: maybe stock H616 related config also works on T507?
+
 config SUNXI_DRAM_H616_DDR3_1333
 	bool "DDR3-1333 boot0 timings on the H616 DRAM controller"
 	select SUNXI_DRAM_DDR3
