@@ -138,6 +138,7 @@ static int do_gpio(struct cmd_tbl *cmdtp, int flag, int argc,
 	unsigned int gpio;
 	enum gpio_cmd sub_cmd;
 	int value;
+	bool quiet = 0;
 	const char *str_cmd, *str_gpio = NULL;
 #ifdef CONFIG_CMD_GPIO_READ
 	const char *str_var = NULL;
@@ -187,6 +188,11 @@ static int do_gpio(struct cmd_tbl *cmdtp, int flag, int argc,
 		goto show_usage;
 
 	/* parse the behavior */
+	if (*str_cmd == 'q') {
+		quiet = true;
+		str_cmd++;
+	}
+
 	switch (*str_cmd) {
 	case 'i':
 		sub_cmd = GPIOC_INPUT;
@@ -261,7 +267,8 @@ static int do_gpio(struct cmd_tbl *cmdtp, int flag, int argc,
 		}
 		gpio_direction_output(gpio, value);
 	}
-	printf("gpio: pin %s (gpio %u) value is ", str_gpio, gpio);
+	if (!quiet)
+        printf("gpio: pin %s (gpio %u) value is ", str_gpio, gpio);
 
 	if (IS_ERR_VALUE(value)) {
 		printf("unknown (ret=%d)\n", value);
@@ -308,8 +315,9 @@ err:
 
 U_BOOT_CMD(gpio, 4, 0, do_gpio,
 	   "query and control gpio pins",
-	   "<input|set|clear|toggle> <pin>\n"
+	   "[q]<input|set|clear|toggle> <pin>\n"
 	   "    - input/set/clear/toggle the specified pin\n"
+	   "	first 'q' for quiet mode\n"
 #ifdef CONFIG_CMD_GPIO_READ
 	   "gpio read <name> <pin>\n"
 	   "    - set environment variable 'name' to the specified pin\n"
