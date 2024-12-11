@@ -133,6 +133,15 @@ config AXP818_POWER
 	Say y here to enable support for the axp818 pmic found on
 	A83T dev board.
 
+config AXP15060_POWER
+	bool "axp15060 pmic support"
+	depends on MACH_SUN50I_H616
+	select AXP_PMIC_BUS
+	---help---
+	Say y here to enable support for the axp15060 (aka axp853t) pmic found on
+	T507 dev board.
+
+
 config SY8106A_POWER
 	bool "SY8106A pmic support"
 	depends on MACH_SUNXI_H3_H5
@@ -144,7 +153,7 @@ endchoice
 
 config AXP_DCDC1_VOLT
 	int "axp pmic dcdc1 voltage"
-	depends on AXP221_POWER || AXP809_POWER || AXP818_POWER
+	depends on AXP221_POWER || AXP809_POWER || AXP818_POWER || AXP15060_POWER
 	default 3300 if AXP818_POWER || MACH_SUN8I_R40
 	default 3000 if MACH_SUN6I || MACH_SUN8I || MACH_SUN9I
 	---help---
@@ -158,7 +167,7 @@ config AXP_DCDC1_VOLT
 
 config AXP_DCDC2_VOLT
 	int "axp pmic dcdc2 voltage"
-	depends on AXP152_POWER || AXP209_POWER || AXP221_POWER || AXP809_POWER || AXP818_POWER || AXP313_POWER || AXP717_POWER
+	depends on AXP152_POWER || AXP209_POWER || AXP221_POWER || AXP809_POWER || AXP818_POWER || AXP313_POWER || AXP717_POWER || AXP15060_POWER
 	default 900 if AXP818_POWER
 	default 1400 if AXP152_POWER || AXP209_POWER
 	default 1000 if AXP313_POWER
@@ -179,7 +188,7 @@ config AXP_DCDC2_VOLT
 
 config AXP_DCDC3_VOLT
 	int "axp pmic dcdc3 voltage"
-	depends on AXP152_POWER || AXP209_POWER || AXP221_POWER || AXP809_POWER || AXP818_POWER || AXP313_POWER || AXP717_POWER
+	depends on AXP152_POWER || AXP209_POWER || AXP221_POWER || AXP809_POWER || AXP818_POWER || AXP313_POWER || AXP717_POWER || AXP15060_POWER
 	default 900 if AXP809_POWER || AXP818_POWER
 	default 1500 if AXP152_POWER
 	default 1250 if AXP209_POWER
@@ -201,7 +210,7 @@ config AXP_DCDC3_VOLT
 
 config AXP_DCDC4_VOLT
 	int "axp pmic dcdc4 voltage"
-	depends on AXP152_POWER || AXP221_POWER || AXP809_POWER || AXP305_POWER
+	depends on AXP152_POWER || AXP221_POWER || AXP809_POWER || AXP305_POWER || AXP15060_POWER
 	default 1250 if AXP152_POWER
 	default 1200 if MACH_SUN6I
 	default 0 if MACH_SUN8I
@@ -219,7 +228,7 @@ config AXP_DCDC4_VOLT
 
 config AXP_DCDC5_VOLT
 	int "axp pmic dcdc5 voltage"
-	depends on AXP221_POWER || AXP809_POWER || AXP818_POWER
+	depends on AXP221_POWER || AXP809_POWER || AXP818_POWER || AXP15060_POWER
 	default 1500 if MACH_SUN6I || MACH_SUN8I || MACH_SUN9I
 	---help---
 	Set the voltage (mV) to program the axp pmic dcdc5 at, set to 0 to
@@ -229,7 +238,7 @@ config AXP_DCDC5_VOLT
 
 config AXP_ALDO1_VOLT
 	int "axp pmic (a)ldo1 voltage"
-	depends on AXP221_POWER || AXP809_POWER || AXP818_POWER
+	depends on AXP221_POWER || AXP809_POWER || AXP818_POWER || AXP15060_POWER
 	default 0 if MACH_SUN6I || MACH_SUN8I_R40
 	default 1800 if MACH_SUN8I_A83T
 	default 3000 if MACH_SUN8I || MACH_SUN9I
@@ -244,7 +253,7 @@ config AXP_ALDO1_VOLT
 
 config AXP_ALDO2_VOLT
 	int "axp pmic (a)ldo2 voltage"
-	depends on AXP152_POWER || AXP209_POWER || AXP221_POWER || AXP809_POWER || AXP818_POWER
+	depends on AXP152_POWER || AXP209_POWER || AXP221_POWER || AXP809_POWER || AXP818_POWER || AXP15060_POWER
 	default 3000 if AXP152_POWER || AXP209_POWER
 	default 0 if MACH_SUN6I || MACH_SUN9I
 	default 1800 if MACH_SUN8I_A83T
@@ -262,7 +271,7 @@ config AXP_ALDO2_VOLT
 
 config AXP_ALDO3_VOLT
 	int "axp pmic (a)ldo3 voltage"
-	depends on AXP209_POWER || AXP221_POWER || AXP809_POWER || AXP818_POWER
+	depends on AXP209_POWER || AXP221_POWER || AXP809_POWER || AXP818_POWER || AXP15060_POWER
 	default 0 if AXP209_POWER || MACH_SUN9I
 	default 3000 if MACH_SUN6I || MACH_SUN8I
 	---help---
@@ -319,7 +328,7 @@ config AXP_ALDO3_INRUSH_QUIRK
 
 config AXP_ALDO4_VOLT
 	int "axp pmic (a)ldo4 voltage"
-	depends on AXP209_POWER
+	depends on AXP209_POWER || AXP15060_POWER
 	default 0 if AXP209_POWER
 	---help---
 	Set the voltage (mV) to program the axp pmic aldo4 at, set to 0 to
@@ -419,7 +428,7 @@ config AXP_FLDO3_VOLT
 
 config AXP_SW_ON
 	bool "axp pmic sw on"
-	depends on AXP809_POWER || AXP818_POWER
+	depends on AXP809_POWER || AXP818_POWER || AXP15060_POWER
 	---help---
 	Enable to turn on axp pmic sw.
 

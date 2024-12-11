@@ -562,7 +562,9 @@ void sunxi_board_init(void)
 #if defined CONFIG_AXP152_POWER || defined CONFIG_AXP209_POWER || \
 	defined CONFIG_AXP221_POWER || defined CONFIG_AXP305_POWER || \
 	defined CONFIG_AXP809_POWER || defined CONFIG_AXP818_POWER || \
-	defined CONFIG_AXP313_POWER || defined CONFIG_AXP717_POWER
+	defined CONFIG_AXP313_POWER || defined CONFIG_AXP717_POWER || \
+	defined CONFIG_AXP15060_POWER
+
 	power_failed = axp_init();
 
 	if (IS_ENABLED(CONFIG_AXP_DISABLE_BOOT_ON_POWERON) && !power_failed) {
@@ -620,7 +622,7 @@ void sunxi_board_init(void)
 	power_failed |= axp_set_fldo(3, CONFIG_AXP_FLDO3_VOLT);
 #endif
 
-#if defined CONFIG_AXP809_POWER || defined CONFIG_AXP818_POWER
+#if defined CONFIG_AXP809_POWER || defined CONFIG_AXP818_POWER || defined CONFIG_AXP15060_POWER
 	power_failed |= axp_set_sw(IS_ENABLED(CONFIG_AXP_SW_ON));
 #endif
 #endif	/* CONFIG_AXPxxx_POWER */
