@@ -30,7 +30,9 @@
             "run load_default_dt; "\
 		"fi;" \
 		"fdt addr ${fdt_addr_r} ${fdt_maxsize};" \
-		"\0" \
+        "if fdt apply ${fdtoverlay_addr_r}; then true; else " \
+            "echo Failed to apply extra overlay! No /proc/device-tree/wirenboard/ will be available;" \
+        "fi\0" \
     "check_button=if run read_button; then false; else true; fi\0" \
 	"not_timeout=test 0x\\${fw_timeout} -gt 0\0" \
     "wait_for_button_countdown=" \
