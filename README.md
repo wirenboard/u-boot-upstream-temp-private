@@ -87,7 +87,7 @@ graph TB
 	`dpkg-deb -x arm-trusted-firmware_2.10.0+dfsg-1+wb2_arm64.deb /tmp`
 
 3. Скопировать компонент **BL31** в удобное место:
-	`cp /tmp/usr/lib/arm-trusted-firmware/sun50i_h616/bl31.bin ~/`
+	`cp /tmp/usr/lib/arm-trusted-firmware/sun50i_h616_no_pmic/bl31.bin ~/`
 	
 4. Очистить мусор (будьте внимательны!):
 	`rm -r /tmp/usr`
